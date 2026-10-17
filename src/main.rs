@@ -5,7 +5,7 @@ use std::{
 };
 
 use clap::Parser;
-use glam::{Quat, Vec3};
+use glam::{Quat, Vec2, Vec3};
 use signal_hook::{
     consts::{SIGINT, SIGTERM, SIGUSR1},
     iterator::Signals,
@@ -123,20 +123,26 @@ fn main_inner(args: Args) -> anyhow::Result<()> {
                     let relative_rot =
                         start_orientation.inverse() * controller.orientation.normalize();
                     let (yaw, pitch, roll) = relative_rot.to_euler(glam::EulerRot::YXZ);
-                    let mut relative_pyr =
-                        (Vec3::new(pitch, yaw, roll) / max_angle_rad).clamp(-Vec3::ONE, Vec3::ONE);
+                    let mut relative_pyr = Vec3::new(pitch, yaw, roll) / max_angle_rad;
 
                     apply_binding_mode(&mut relative_pyr, binding_mode);
 
-                    hotas.set_axis(ABS_X, -relative_pyr.z)?;
-                    hotas.set_axis(ABS_Y, relative_pyr.x)?;
-                    hotas.set_axis(ABS_RX, -relative_pyr.y)?;
+                    // clamp combined x/y deflection to a unit circle
+                    let stick = stick_axes(relative_pyr);
+                    hotas.set_axis(ABS_X, stick.x)?;
+                    hotas.set_axis(ABS_Y, stick.y)?;
+                    // yaw independent from the circular stick.
+                    hotas.set_axis(ABS_RX, -relative_pyr.y.clamp(-1.0, 1.0))?;
                 }
             }
         }
     }
 
     Ok(())
+}
+
+fn stick_axes(relative_pyr: Vec3) -> Vec2 {
+    Vec2::new(-relative_pyr.z, relative_pyr.x).clamp_length_max(1.0)
 }
 
 fn apply_binding_mode(values: &mut Vec3, binding_mode: bool) {
