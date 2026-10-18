@@ -35,6 +35,8 @@ pub const BTN_SELECT: u16 = 0x13a;
 pub const BTN_START: u16 = 0x13b;
 pub const BTN_THUMBL: u16 = 0x13d; // left stick click
 pub const BTN_THUMBR: u16 = 0x13e; // right stick click
+pub const BTN_TL3: u16 = 0x13f; // left paddle / macro button
+pub const BTN_TR3: u16 = 0x140; // right paddle / macro button
 pub const BTN_DPAD_UP: u16 = 0x220;
 pub const BTN_DPAD_DOWN: u16 = 0x221;
 pub const BTN_DPAD_LEFT: u16 = 0x222;
@@ -53,6 +55,8 @@ const BTN_ALL: &[u16] = &[
     BTN_START,
     BTN_THUMBL,
     BTN_THUMBR,
+    BTN_TL3,
+    BTN_TR3,
     BTN_DPAD_UP,
     BTN_DPAD_RIGHT,
     BTN_DPAD_DOWN,
